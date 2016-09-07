@@ -41,8 +41,21 @@ router.get('/', function(req, res, next) {
 	});
 });
 
-router.get('/electric', function(req, res, next){
-	res.json(req.query);
+router.post('/electric', function(req, res, next){
+	// res.json(req.body);
+	// 1. We know whether they voted electric or poser because it's in req.body.submit
+	// 2. We know what image they voted on because it's in req.body.image	
+	// 3. We know who they are because we have their IP address.
+
+	db.collection('votes').insertOne({
+		ip: req.ip,
+		vote: req.body.submit,
+		image: req.body.image
+	});
+
+	// res.json("success");
+	res.redirect('/');
+
 });
 
 

@@ -21,6 +21,7 @@
 	<div class="button-holder">
 		<div class="button-form">
 			<form class="vote-button" action="/electric" method="post">
+				<input type="hidden" name="image" value="<%= imageToRender %>">
 				<input type="submit" name="submit" class="btn btn-info" value="Electric!">
 			</form>
 		</div>
@@ -28,7 +29,8 @@
 
 	<div class="button-holder">
 		<div class="button-form">
-			<form class="vote-button" action="/electric" method="get">
+			<form class="vote-button" action="/electric" method="post">
+				<input type="hidden" name="image" value="<%= imageToRender %>">
 				<input type="submit" name="submit" class="btn btn-info" value="Poser">
 			</form>
 		</div>
