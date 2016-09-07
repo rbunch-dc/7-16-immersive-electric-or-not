@@ -30,14 +30,34 @@ mongoClient.connect(mongoUrl, function(error, database){
 // Send the random one to EJS via a res.render('index', {picsArray})
 
 router.get('/', function(req, res, next) {
-	console.dir(next);
-// 2. Get picts from Mongo and store them in an array to pass to view.
-	db.collection('images').find().toArray(function(error, photos){
-		// 3. Grab a random image from that array
-		var randomNum = Math.floor(Math.random() * photos.length);
-		var randomPhoto = photos[randomNum].imgSrc;
-		// 4. Send that image to the view
-		res.render('index', { imageToRender: randomPhoto });
+	// console.dir(next);
+
+	var userIP = req.ip;
+	// 5. Find all the photos the user has voted on and load an array up with them.
+	db.collection('votes').find({ip:userIP}).toArray(function(error, userResult){
+		var photosVoted = [];
+		if(error){
+			console.log("There was an error fetching user votes.");
+		}else{
+			// console.log(userResult);
+			for(var i=0; i<userResult.length; i++){
+				photosVoted.push(userResult[i].image);
+			}
+		}
+
+		// 2. Get picts from Mongo and store them in an array to pass to view.
+		// 6. Limit the query to photos not voted on
+		db.collection('images').find({imgSrc: { $nin: photosVoted } }).toArray(function(error, photos){
+			if (photos.length === 0){
+				res.send("You have voted on all images.");
+			}else{
+				// 3. Grab a random image from that array
+				var randomNum = Math.floor(Math.random() * photos.length);
+				var randomPhoto = photos[randomNum].imgSrc;
+				// 4. Send that image to the view
+				res.render('index', { imageToRender: randomPhoto });
+			}
+		});
 	});
 });
 
@@ -53,10 +73,39 @@ router.post('/electric', function(req, res, next){
 		image: req.body.image
 	});
 
+	// 7. Update the images collection so that the image voted on will have a new totalVotes
+	db.collection('images').find({imgSrc: req.body.image}).toArray(function(error,result){
+		var total;
+		if(isNaN(result[0].totalVotes)){
+			total = 0;
+		}else{
+			total = result[0].totalVotes;
+		}
+		db.collection('images').updateOne(
+			{ imgSrc: req.body.image},
+			{ 
+				$set: {"totalVotes": (total + 1)}
+			}, function(error, results){
+				//Check to see if there is an error
+				//Check to see if the docuemtn was updated
+			}
+		)
+	})
+
 	// res.json("success");
 	res.redirect('/');
 
 });
+
+router.get('/standings', function(req, res, next){
+	db.collection('images').find().toArray(function(error, allResults){
+		var standingsArray = [];
+		allResults.sort(function(a,b){
+			return (b.totalVotes - a.totalVotes);
+		});
+		res.render('standings', {theStandings: allResults});
+	});
+})
 
 
 module.exports = router;
