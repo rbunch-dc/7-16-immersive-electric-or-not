@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>
+	
+	</title>
+
+	<link rel="stylesheet" type="text/css" href="/stylesheets/bootstrap.min.css">
+
+	<link rel="stylesheet" type="text/css" href="/stylesheets/style.css">
+
+</head>
+<body>
+
+	<h1>A node.js voting game - is the electric car below really electric?</h1>
+
+	<div id="image">
+		<img src="/images/<%= imageToRender %>">
+	</div>
+
+	<div class="button-holder">
+		<div class="button-form">
+			<form class="vote-button" action="/electric" method="post">
+				<input type="submit" name="submit" class="btn btn-info" value="Electric!">
+			</form>
+		</div>
+	</div>
+
+	<div class="button-holder">
+		<div class="button-form">
+			<form class="vote-button" action="/electric" method="get">
+				<input type="submit" name="submit" class="btn btn-info" value="Poser">
+			</form>
+		</div>
+	</div>
+
+</body>
+</html>
+
+
