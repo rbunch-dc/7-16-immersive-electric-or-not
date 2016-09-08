@@ -49,7 +49,8 @@ router.get('/', function(req, res, next) {
 		// 6. Limit the query to photos not voted on
 		db.collection('images').find({imgSrc: { $nin: photosVoted } }).toArray(function(error, photos){
 			if (photos.length === 0){
-				res.send("You have voted on all images.");
+				// res.send("You have voted on all images.");
+				res.redirect('/standings')
 			}else{
 				// 3. Grab a random image from that array
 				var randomNum = Math.floor(Math.random() * photos.length);
@@ -67,6 +68,12 @@ router.post('/electric', function(req, res, next){
 	// 2. We know what image they voted on because it's in req.body.image	
 	// 3. We know who they are because we have their IP address.
 
+if(req.body.submit == 'Electric!'){
+	var upDownVote = 1;
+}else if(req.body.submit == 'Poser'){
+	var upDownVote = -1;
+}
+
 	db.collection('votes').insertOne({
 		ip: req.ip,
 		vote: req.body.submit,
@@ -81,10 +88,11 @@ router.post('/electric', function(req, res, next){
 		}else{
 			total = result[0].totalVotes;
 		}
+
 		db.collection('images').updateOne(
 			{ imgSrc: req.body.image},
 			{ 
-				$set: {"totalVotes": (total + 1)}
+				$set: {"totalVotes": (total + upDownVote)}
 			}, function(error, results){
 				//Check to see if there is an error
 				//Check to see if the docuemtn was updated
@@ -107,5 +115,14 @@ router.get('/standings', function(req, res, next){
 	});
 })
 
+router.get('/resetUserVotes', (req, res, next) =>{
+	db.collection('votes').deleteMany(
+		{ip:req.ip},
+		function(error, results){
+
+		}
+	);
+	res.redirect('/');
+});
 
 module.exports = router;
