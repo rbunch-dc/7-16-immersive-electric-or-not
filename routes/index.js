@@ -1,5 +1,9 @@
 var express = require('express');
 var router = express.Router();
+var multer = require('multer');
+var upload = multer({dest: 'public/images'});
+var type = upload.single('fileUploaded');
+var fs = require('fs');
 
 // 1. Connect to MongoDB.
 var mongodb = require('mongodb');
@@ -28,6 +32,23 @@ mongoClient.connect(mongoUrl, function(error, database){
 // Load those pictures into an array
 // Pick a random one
 // Send the random one to EJS via a res.render('index', {picsArray})
+
+//Add multer file upload
+router.post('/form_submit', type, function(req, res, next){
+	// res.json(req.file);
+
+	var tmp_path = req.file.path;
+	var target_path = 'public/images/' + req.file.originalname
+	fs.readFile(tmp_path, function (error, data){
+		fs.writeFile(target_path, data, function(error){
+			res.json('File Uploaded to ' + target_path);
+		});
+	});
+});
+
+router.get('/form_submit', function(req, res, next){
+	res.render('form_submit',{});
+});
 
 router.get('/', function(req, res, next) {
 	// console.dir(next);
